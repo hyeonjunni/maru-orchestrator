@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["goal", "assumptions", "tasks", "acceptance_criteria", "risks", "blocking_surface", "blocker"],
+  "properties": {
+    "goal": {"type": "string"},
+    "assumptions": {"type": "array", "items": {"type": "string"}},
+    "tasks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "description", "depends_on"],
+        "properties": {
+          "id": {"type": "string"},
+          "description": {"type": "string"},
+          "depends_on": {"type": "array", "items": {"type": "string"}}
+        }
+      }
+    },
+    "acceptance_criteria": {"type": "array", "items": {"type": "string"}},
+    "risks": {"type": "array", "items": {"type": "string"}},
+    "blocking_surface": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "Named criteria a reviewer may block on. Defaults to acceptance_criteria."
+    },
+    "blocker": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["classification", "message", "criterion", "authority", "details"],
+      "description": "Set this, with an empty `tasks`, instead of planning work you may not or cannot plan. Null when there is no blocker.",
+      "properties": {
+        "classification": {
+          "enum": [
+            "RULE_INCOMPLETE",
+            "RULE_AMBIGUOUS",
+            "ORDERING_CONTRADICTION",
+            "AUTHORITY_CONFUSION",
+            "INPUT_MISSING",
+            "CAPABILITY_MISSING",
+            "HUMAN_AUTHORITY_REQUIRED",
+            "RESOURCE_EXHAUSTED",
+            "OTHER"
+          ],
+          "description": "The blocker class. This alone decides routing."
+        },
+        "message": {"type": "string", "description": "One sentence a human can act on."},
+        "criterion": {
+          "type": ["string", "null"],
+          "description": "The criterion or project rule this blocker is about, or null."
+        },
+        "authority": {
+          "type": ["string", "null"],
+          "description": "Who holds the authority you lack, e.g. the Constitution rule, or null."
+        },
+        "details": {"type": "array", "items": {"type": "string"}}
+      }
+    }
+  }
+}

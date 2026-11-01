@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["result", "blocking", "non_blocking"],
+  "properties": {
+    "result": {"enum": ["pass", "fail"]},
+    "blocking": {"type": "array", "items": {"$ref": "#/$defs/finding"}},
+    "non_blocking": {"type": "array", "items": {"$ref": "#/$defs/finding"}}
+  },
+  "$defs": {
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["file", "location", "evidence", "message", "classification", "criterion"],
+      "properties": {
+        "file": {"type": "string"},
+        "location": {"type": "string"},
+        "evidence": {"type": "string"},
+        "message": {"type": "string"},
+        "classification": {
+          "enum": [
+            "BLOCKING_IN_SCOPE",
+            "NON_BLOCKING",
+            "OUT_OF_SCOPE",
+            "HUMAN_AUTHORITY_REQUIRED",
+            "CAPABILITY_REQUIRED"
+          ],
+          "description": "Only BLOCKING_IN_SCOPE spends a Worker fix loop. Defaults to it."
+        },
+        "criterion": {
+          "type": ["string", "null"],
+          "description": "The accepted criterion this finding cites."
+        }
+      }
+    }
+  }
+}
+

@@ -1,0 +1,48 @@
+[agents.planner]
+backend = "claude"
+permission = "read-only"
+
+[agents.challenger]
+backend = "codex"
+fallback = ["claude"]
+permission = "read-only"
+
+[agents.worker]
+backend = "claude"
+permission = "workspace-write"
+
+[agents.reviewer]
+backend = "codex"
+fallback = ["claude"]
+permission = "read-only"
+
+# A fallback keeps an Arc moving when a provider's quota runs out, but a reviewer that lands on
+# the worker's own provider is not an independent review and MARU says so in the evidence level.
+[provider_policy]
+allow_fallback = true
+require_independent_review_for_verified = true
+
+# Role projection and incremental review are what keep prompt cost from scaling with the size of
+# the deliverable times the number of review iterations.
+[context]
+max_packet_bytes = 80000
+max_diff_bytes = 50000
+review_mode = "incremental"
+role_projection = true
+
+[limits]
+plan_revisions = 2
+review_fix_loops = 3
+
+[paths]
+state_db = ".maru/maru.db"
+tasks = "tasks"
+
+
+# Deterministic project checks, run in order after the Worker. argv arrays, never a shell
+# string; MARU runs all of them and fails the gate if any one fails.
+[test_gate]
+commands = [
+  ["uv", "run", "ruff", "check", "."],
+  ["uv", "run", "pytest"],
+]

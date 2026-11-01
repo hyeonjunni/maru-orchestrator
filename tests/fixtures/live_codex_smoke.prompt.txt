@@ -1,0 +1,2 @@
+Return exactly this JSON object and nothing else:
+{"ok": true}

@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["result", "findings", "recommendation"],
+  "properties": {
+    "result": {"enum": ["pass", "fail"]},
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["severity", "evidence", "message", "classification", "criterion"],
+        "properties": {
+          "severity": {"enum": ["blocking", "non-blocking"]},
+          "evidence": {"type": "string"},
+          "message": {"type": "string"},
+          "classification": {
+            "enum": [
+              "BLOCKING_IN_SCOPE",
+              "NON_BLOCKING",
+              "OUT_OF_SCOPE",
+              "HUMAN_AUTHORITY_REQUIRED",
+              "CAPABILITY_REQUIRED"
+            ],
+            "description": "Only BLOCKING_IN_SCOPE spends a plan revision. Defaults to it."
+          },
+          "criterion": {
+            "type": ["string", "null"],
+            "description": "The frozen blocking-surface criterion this finding cites."
+          }
+        }
+      }
+    },
+    "recommendation": {"type": "string"}
+  }
+}
+

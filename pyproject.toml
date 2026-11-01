@@ -1,0 +1,46 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "maru"
+version = "0.2.0"
+description = "Memory-Aware Relay & Understanding"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+  "platformdirs",
+  "pydantic>=2",
+  "rich",
+  "typer",
+]
+
+[project.scripts]
+maru = "maru.cli.app:app"
+
+[dependency-groups]
+dev = [
+  "mypy",
+  "pytest",
+  "pytest-cov",
+  "ruff",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/maru"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.mypy]
+python_version = "3.12"
+packages = ["maru"]
+strict = true

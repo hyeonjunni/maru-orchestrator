@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["changed_files", "notes", "tests_expected", "unresolved_risks", "blocker"],
+  "properties": {
+    "changed_files": {"type": "array", "items": {"type": "string"}},
+    "notes": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "Implementation notes: what changed and why."
+    },
+    "tests_expected": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "Tests that should cover this change. MARU Core executes the gate, not you."
+    },
+    "unresolved_risks": {"type": "array", "items": {"type": "string"}},
+    "blocker": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["classification", "message", "criterion", "authority", "details"],
+      "description": "Set this, with an empty `changed_files`, instead of reporting work you could not do. Null when there is no blocker.",
+      "properties": {
+        "classification": {
+          "enum": [
+            "RULE_INCOMPLETE",
+            "RULE_AMBIGUOUS",
+            "ORDERING_CONTRADICTION",
+            "AUTHORITY_CONFUSION",
+            "INPUT_MISSING",
+            "CAPABILITY_MISSING",
+            "HUMAN_AUTHORITY_REQUIRED",
+            "RESOURCE_EXHAUSTED",
+            "OTHER"
+          ],
+          "description": "The blocker class. This alone decides routing."
+        },
+        "message": {"type": "string", "description": "One sentence a human can act on."},
+        "criterion": {
+          "type": ["string", "null"],
+          "description": "The criterion or project rule this blocker is about, or null."
+        },
+        "authority": {
+          "type": ["string", "null"],
+          "description": "Who holds the authority you lack, e.g. the Constitution rule, or null."
+        },
+        "details": {"type": "array", "items": {"type": "string"}}
+      }
+    }
+  }
+}
