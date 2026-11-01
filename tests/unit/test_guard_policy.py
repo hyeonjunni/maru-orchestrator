@@ -26,11 +26,14 @@ def test_unplanned_changes_to_the_grading_rules_are_violations() -> None:
     assert all("unapproved-grading-change" in violation for violation in violations)
 
 
-def test_a_plan_that_names_the_path_or_its_directory_approves_the_change() -> None:
-    named = review_worker_changes(["tests/unit/test_status.py"], "Add tests/unit/test_status.py")
+def test_only_structured_exact_paths_authorize_grading_changes() -> None:
+    path = "tests/unit/test_status.py"
+    assert review_worker_changes([path], "Do not modify tests/")
+    assert review_worker_changes([path], "Add tests/unit/test_status.py")
+    named = review_worker_changes([path], "", writable_paths=[path])
     assert named == []
-    assert review_worker_changes(["tests/unit/test_status.py"], "Add coverage under tests/") == []
-    assert review_worker_changes(["pyproject.toml"], "Pin ruff in pyproject.toml") == []
+    assert review_worker_changes([path], "", writable_paths=["tests/"])
+    assert review_worker_changes(["pyproject.toml"], "", writable_paths=["pyproject.toml"]) == []
 
 
 def test_ordinary_source_changes_are_never_violations() -> None:
@@ -61,4 +64,4 @@ def test_packaged_role_prompts_need_explicit_plan_approval() -> None:
     prompt = "src/maru/assets/prompts/reviewer.md"
 
     assert review_worker_changes([prompt], "unrelated plan")
-    assert review_worker_changes([prompt], f"Rewrite {prompt}") == []
+    assert review_worker_changes([prompt], "", writable_paths=[prompt]) == []

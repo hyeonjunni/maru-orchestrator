@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
   "additionalProperties": false,
-  "required": ["goal", "assumptions", "tasks", "acceptance_criteria", "risks", "blocking_surface", "blocker"],
+  "required": ["goal", "assumptions", "tasks", "acceptance_criteria", "risks", "writable_paths", "blocking_surface", "blocker"],
   "properties": {
     "goal": {"type": "string"},
     "assumptions": {"type": "array", "items": {"type": "string"}},
@@ -21,6 +21,7 @@
     },
     "acceptance_criteria": {"type": "array", "items": {"type": "string"}},
     "risks": {"type": "array", "items": {"type": "string"}},
+    "writable_paths": {"type": "array", "items": {"type": "string"}},
     "blocking_surface": {
       "type": "array",
       "items": {"type": "string"},

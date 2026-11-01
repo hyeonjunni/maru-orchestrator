@@ -163,6 +163,7 @@ class PlanArtifact(BaseModel):
     tasks: list[PlanTask]
     acceptance_criteria: list[str]
     risks: list[str] = Field(default_factory=list)
+    writable_paths: list[str] = Field(default_factory=list)
     # Named ids the Challenger and Reviewer are allowed to block on. Once the plan is accepted
     # this is the frozen blocking surface; a finding outside it escalates to a human instead of
     # spending another plan revision on an ever-widening review.
@@ -224,6 +225,11 @@ class ReviewArtifact(BaseModel):
 
     @model_validator(mode="after")
     def pass_has_no_blockers(self) -> ReviewArtifact:
+        if any(
+            finding.classification in {FindingClass.NON_BLOCKING, FindingClass.OUT_OF_SCOPE}
+            for finding in self.blocking
+        ):
+            raise ValueError("non-blocking or out-of-scope findings cannot be in the blocking list")
         if self.result == "pass" and self.blocking:
             raise ValueError("a passing code review cannot contain blocking findings")
         return self

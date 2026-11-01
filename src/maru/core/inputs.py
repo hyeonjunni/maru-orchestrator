@@ -139,6 +139,20 @@ def snapshot(
     """Copy every declared input into the task's input area and record its identity."""
     snapshot_dir = task_dir / SNAPSHOT_DIR
     snapshot_dir.mkdir(parents=True, exist_ok=True)
+    if (snapshot_dir / MANIFEST_FILE).exists():
+        existing = load_manifest(task_dir)
+        expected = {
+            item.name: str((root / item.path.expanduser()).resolve()) for item in declared
+        }
+        recorded = {item.name: item.source_path for item in existing.inputs}
+        if expected != recorded or verify_closure(root, existing):
+            raise InputClosureError("Required inputs changed; use a new task slug")
+        return existing
+    targets = [f"{item.name}{item.path.suffix}".casefold() for item in declared]
+    if any(target.endswith((" ", ".")) for target in targets):
+        raise InputClosureError("Required input filename cannot end in a space or dot")
+    if MANIFEST_FILE.casefold() in targets or len(targets) != len(set(targets)):
+        raise InputClosureError("Required input snapshot filename collision")
     manifest = InputManifest()
     for declaration in declared:
         source = declaration.path.expanduser()

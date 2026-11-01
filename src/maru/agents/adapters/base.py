@@ -136,6 +136,11 @@ def run_process(
         stdout, stderr = process.communicate()
         detail = f"{stderr}\nProcess timed out after {timeout_s} seconds".strip()
         return 124, stdout, detail
+    except BaseException:
+        # Release the project lock only after an interrupted agent can no longer write.
+        _kill_process_tree(process)
+        process.communicate()
+        raise
 
 
 def _kill_process_tree(process: subprocess.Popen[str]) -> None:

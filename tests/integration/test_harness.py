@@ -24,8 +24,10 @@ class ScriptedAdapter:
         prompts: list[tuple[str, str]] | None = None,
         worker_writes: dict[str, str] | list[dict[str, str]] | None = None,
         plan_tasks: list[dict[str, object]] | None = None,
+        writable_paths: list[str] | None = None,
     ) -> None:
         self.backend = backend
+        self.writable_paths = writable_paths or []
         self.calls = calls
         self.challenger_passes = challenger_passes
         self.contradictory = contradictory
@@ -59,6 +61,7 @@ class ScriptedAdapter:
                 "tasks": self.plan_tasks,
                 "acceptance_criteria": ["Empty state does not crash"],
                 "risks": [],
+                "writable_paths": self.writable_paths,
             },
             "challenger": {
                 "result": "pass" if self.challenger_passes else "fail",
@@ -164,6 +167,30 @@ tasks = "tasks"
 
 def _store(root: Path) -> SqliteStore:
     return SqliteStore(root / ".maru" / "maru.db")
+
+
+def test_checks_cannot_change_the_workspace_after_diff_capture(tmp_path) -> None:
+    root = _project(tmp_path)
+    calls = []
+
+    def mutating_check(project):
+        (project / "tests/test_demo.py").write_text("def test_demo(): assert True\n")
+        return True, "formatter passed"
+
+    with pytest.raises(RelayStopped, match="checks modified"):
+        run_relay(
+            root, "first-relay",
+            adapter_factory=lambda backend: ScriptedAdapter(backend, calls, True),
+            test_runner=mutating_check,
+        )
+    assert not any(role == "reviewer" for role, _, _ in calls)
+    assert _store(root).get_arc("first-relay").state is ArcState.PAUSED
+    evidence = [e.payload for e in _store(root).list_events("first-relay")
+                if e.type == "EVIDENCE_ASSESSED"][-1]
+    assert evidence["work_performed"] is True
+    assert evidence["evidence_level"] == "BLOCKED_WITH_CHANGES"
+    summary = (root / "tasks/first-relay/artifacts/human-summary.md").read_text()
+    assert "No implementation was performed" not in summary
 
 
 def test_relay_uses_configured_backends_and_writes_human_summary(tmp_path) -> None:
@@ -304,6 +331,7 @@ def test_relay_allows_test_changes_the_approved_plan_asks_for(tmp_path) -> None:
             [],
             True,
             worker_writes={"tests/test_demo.py": "def test_demo():\n    assert True\n"},
+            writable_paths=["tests/test_demo.py"],
             plan_tasks=[
                 {
                     "id": "task-1",
@@ -608,6 +636,7 @@ def test_changes_diff_shows_tracked_edits_and_new_file_contents(tmp_path) -> Non
                 "tests/test_demo.py": "def test_demo():\n    assert True\n",
                 "src/new_module.py": "VALUE = 1\n",
             },
+            writable_paths=["tests/test_demo.py"],
             plan_tasks=[
                 {
                     "id": "task-1",

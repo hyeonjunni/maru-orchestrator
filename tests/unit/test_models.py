@@ -12,6 +12,16 @@ from maru.core.models import (
 )
 
 
+@pytest.mark.parametrize("classification", ["NON_BLOCKING", "OUT_OF_SCOPE"])
+def test_review_cannot_route_nonblocking_classifications_into_fix_loops(classification) -> None:
+    with pytest.raises(ValueError, match="blocking list"):
+        ReviewArtifact.model_validate({
+            "result": "fail",
+            "blocking": [{"file": "a.py", "location": "1", "evidence": "x",
+                          "message": "x", "classification": classification}],
+        })
+
+
 def test_passing_reviews_cannot_contain_blocking_findings() -> None:
     with pytest.raises(ValidationError):
         PlanReviewArtifact.model_validate(

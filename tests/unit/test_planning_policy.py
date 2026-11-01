@@ -79,6 +79,7 @@ def test_planning_schemas_unchanged() -> None:
         "tasks",
         "acceptance_criteria",
         "risks",
+        "writable_paths",
         "blocking_surface",
         "blocker",
     ]

@@ -127,6 +127,8 @@ class EvidenceLevel(StrEnum):
     # The Arc stopped on a typed blocker. Nothing was implemented, so nothing was reviewed;
     # what the audit trail supports is the *decision*, not an implementation.
     BLOCKED_NO_IMPLEMENTATION = "BLOCKED_NO_IMPLEMENTATION"
+    BLOCKED_WITH_CHANGES = "BLOCKED_WITH_CHANGES"
+    BLOCKED_WORK_UNKNOWN = "BLOCKED_WORK_UNKNOWN"
     # The relay completed, the gate passed and the Reviewer passed - on an empty change set.
     # A legitimate outcome, but the Reviewer reviewed an absence, not an implementation.
     INTENTIONAL_NOOP_COMPLETION = "INTENTIONAL_NOOP_COMPLETION"

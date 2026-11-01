@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from collections.abc import Iterable
 from enum import StrEnum
-from pathlib import PurePosixPath
 
 
 class Decision(StrEnum):
@@ -68,14 +67,16 @@ def protected_scope_text() -> str:
     return (
         "Never writable, whatever the plan says:\n"
         f"{protected}\n\n"
-        "Writable only when the accepted plan names the exact path, because these decide "
-        "whether you pass:\n"
+        "Writable only when the accepted plan's writable_paths lists the exact path, "
+        "because these decide whether you pass:\n"
         f"{graded}\n\n"
         "Everything else in the repository is writable within the accepted plan's scope."
     )
 
 
-def review_worker_changes(changed_paths: Iterable[str], plan_text: str) -> list[str]:
+def review_worker_changes(
+    changed_paths: Iterable[str], plan_text: str, *, writable_paths: list[str] | None = None
+) -> list[str]:
     """Return one human-readable violation per path the Worker should not have changed.
 
     ``changed_paths`` are repository-relative POSIX paths, as ``git status`` reports them.
@@ -84,7 +85,7 @@ def review_worker_changes(changed_paths: Iterable[str], plan_text: str) -> list[
     for path in sorted(set(changed_paths)):
         if path in _PROTECTED_FILES:
             violations.append(f"{_PROTECTED_FILES[path]}: {path} is protected from agent edits")
-        elif _grades_the_worker(path) and not _plan_approves(path, plan_text):
+        elif _grades_the_worker(path) and path not in (writable_paths or []):
             violations.append(
                 f"unapproved-grading-change: {path} decides whether the Worker passes "
                 "and the approved plan does not ask for it"
@@ -94,10 +95,3 @@ def review_worker_changes(changed_paths: Iterable[str], plan_text: str) -> list[
 
 def _grades_the_worker(path: str) -> bool:
     return path in _GRADED_FILES or path.startswith(_GRADED_PREFIXES)
-
-
-def _plan_approves(path: str, plan_text: str) -> bool:
-    """True when the plan names the path or a directory containing it."""
-    candidate = PurePosixPath(path)
-    names = [str(candidate)] + [f"{parent}/" for parent in candidate.parents if str(parent) != "."]
-    return any(name in plan_text for name in names)

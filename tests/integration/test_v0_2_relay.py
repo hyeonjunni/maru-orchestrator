@@ -320,15 +320,29 @@ def test_a_delegated_decision_is_authorized_and_audited(tmp_path, monkeypatch) -
     assert refused.exit_code != 0
     assert _store(root).get_gate(gate.id).status is GateStatus.OPEN
 
-    allowed = runner.invoke(
+    unbound = runner.invoke(
         app, ["approve", gate.id, "--decision", "approve_nonsemantic_factual_fix"]
+    )
+    assert unbound.exit_code != 0
+    assert _store(root).get_gate(gate.id).status is GateStatus.OPEN
+    decision = f"{gate.id}:APPROVED"
+    config = root / "maru.toml"
+    config.write_text(
+        config.read_text(encoding="utf-8").replace("approve_nonsemantic_factual_fix", decision),
+        encoding="utf-8",
+    )
+    wrong_outcome = runner.invoke(app, ["reject", gate.id, "--decision", decision])
+    assert wrong_outcome.exit_code != 0
+    assert _store(root).get_gate(gate.id).status is GateStatus.OPEN
+    allowed = runner.invoke(
+        app, ["approve", gate.id, "--decision", decision]
     )
 
     assert allowed.exit_code == 0, allowed.stdout
     delegated = _events(root, "DELEGATED_DECISION")
     assert len(delegated) == 1
     assert delegated[0]["delegated_actor"] == "DEMO_DELEGATED_HUMAN"
-    assert delegated[0]["decision"] == "approve_nonsemantic_factual_fix"
+    assert delegated[0]["decision"] == decision
     resolved = [event for event in _events(root, "GATE_RESOLVED")]
     assert resolved[-1]["actor"] == "DEMO_DELEGATED_HUMAN"
 

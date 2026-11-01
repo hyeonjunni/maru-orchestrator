@@ -3,8 +3,36 @@ from __future__ import annotations
 import sys
 import time
 
+import pytest
+
 from maru.agents.adapters.base import execute, no_redaction, prepare_run
 from maru.core.models import AgentRequest
+
+
+def test_interrupted_process_is_reaped_before_control_returns(tmp_path, monkeypatch) -> None:
+    from maru.agents.adapters import base
+
+    original = base.subprocess.Popen.communicate
+    processes = []
+
+    def interrupt_once(process, *args, **kwargs):
+        if not processes:
+            processes.append(process)
+            raise KeyboardInterrupt
+        return original(process, *args, **kwargs)
+
+    monkeypatch.setattr(base.subprocess.Popen, "communicate", interrupt_once)
+    try:
+        with pytest.raises(KeyboardInterrupt):
+            base.run_process(
+                [sys.executable, "-c", "import time; time.sleep(30)"], cwd=tmp_path
+            )
+        assert processes[0].poll() is not None
+    finally:
+        # Keep the failing regression from leaving its own process behind.
+        if processes and processes[0].poll() is None:
+            base._kill_process_tree(processes[0])
+            original(processes[0])
 
 
 def test_agent_process_timeout_is_bounded(tmp_path) -> None:

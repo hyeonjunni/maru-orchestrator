@@ -27,6 +27,39 @@ def _task(tmp_path):
     return root, task_dir
 
 
+def test_restart_refuses_changed_input_without_overwriting_evidence(tmp_path) -> None:
+    root, task_dir = _task(tmp_path)
+    source = root / "spec.md"
+    source.write_text("original", encoding="utf-8")
+    _declare(task_dir, '[[inputs]]\nname = "spec"\npath = "spec.md"\n')
+    first = snapshot(task_dir, declarations(task_dir), root=root)
+    original_manifest = (task_dir / "inputs/manifest.json").read_bytes()
+    source.write_text("replacement", encoding="utf-8")
+    with pytest.raises(InputClosureError, match="new task slug"):
+        snapshot(task_dir, declarations(task_dir), root=root)
+    assert (root / first.inputs[0].snapshot_path).read_text() == "original"
+    assert (task_dir / "inputs/manifest.json").read_bytes() == original_manifest
+
+
+def test_input_cannot_replace_its_manifest(tmp_path) -> None:
+    root, task_dir = _task(tmp_path)
+    (root / "source.json").write_text("{}", encoding="utf-8")
+    _declare(task_dir, '[[inputs]]\nname = "manifest"\npath = "source.json"\n')
+    with pytest.raises(InputClosureError, match="snapshot filename collision"):
+        snapshot(task_dir, declarations(task_dir), root=root)
+    assert not (task_dir / "inputs/manifest.json").exists()
+
+
+@pytest.mark.parametrize("name", ["manifest.json ", "manifest.json.", "spec ", "spec."])
+def test_snapshot_rejects_windows_trailing_filename_aliases(tmp_path, name) -> None:
+    root, task_dir = _task(tmp_path)
+    (root / "source").write_text("original input", encoding="utf-8")
+    _declare(task_dir, f'[[inputs]]\nname = {json.dumps(name)}\npath = "source"\n')
+    with pytest.raises(InputClosureError, match="filename"):
+        snapshot(task_dir, declarations(task_dir), root=root)
+    assert list((task_dir / "inputs").iterdir()) == []
+
+
 def test_no_declaration_file_means_no_required_inputs(tmp_path) -> None:
     root, task_dir = _task(tmp_path)
 

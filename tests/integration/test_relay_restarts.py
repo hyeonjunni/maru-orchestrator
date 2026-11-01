@@ -92,7 +92,7 @@ except RelayStopped:
     assert start_run(tmp_path, "other", goal="Other work").is_dir()
 
 
-def test_worker_cannot_hide_grading_edit_in_an_already_dirty_path(tmp_path):
+def test_check_mutation_stops_before_a_worker_can_hide_a_grading_edit(tmp_path):
     root = _project(tmp_path)
     writes = [{"helper.py": "VALUE = 1\n"}, {"tests/test_demo.py": "# checks removed\n"}]
 
@@ -100,10 +100,24 @@ def test_worker_cannot_hide_grading_edit_in_an_already_dirty_path(tmp_path):
         (project / "tests/test_demo.py").write_text("def test_demo():\n    assert False\n")
         return False, "failed"
 
-    with pytest.raises(RelayStopped, match="unapproved-grading-change"):
+    with pytest.raises(RelayStopped, match="checks modified"):
         run_relay(
             root,
             "first-relay",
             adapter_factory=lambda b: ScriptedAdapter(b, [], True, worker_writes=writes),
             test_runner=gate,
         )
+    assert len(writes) == 1  # The second Worker is never invoked.
+
+
+def test_approval_state_without_a_gate_cannot_restart_planning(tmp_path):
+    root = _project(tmp_path)
+    store = SqliteStore(root / ".maru/maru.db")
+    store.initialize()
+    store.create_arc(Arc(id="first-relay", goal="Finish status", state=ArcState.HUMAN_APPROVAL))
+    calls = []
+    with pytest.raises(RelayStopped, match="HUMAN_APPROVAL"):
+        run_relay(root, "first-relay", adapter_factory=lambda b: ScriptedAdapter(b, calls, True))
+    assert calls == []
+    assert store.get_arc("first-relay").state is ArcState.HUMAN_APPROVAL
+    assert store.list_events("first-relay") == []

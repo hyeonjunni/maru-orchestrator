@@ -512,7 +512,7 @@ def test_approving_a_governance_escalation_says_the_work_still_has_to_happen(
     result = runner.invoke(app, ["approve", gate_id])
 
     assert result.exit_code == 0
-    assert "Authority granted; no implementation was performed" in result.stdout
+    assert "protected actions must be completed by the human" in result.stdout
     # The console may wrap the command across lines, so match the instruction, not the layout.
     assert "maru resume" in result.stdout
     # The Arc is still paused on purpose: authority was granted, the work was not done.

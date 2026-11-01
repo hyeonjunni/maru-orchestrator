@@ -275,15 +275,16 @@ def _run_relay(  # noqa: C901 - one relay, one readable sequence; splitting it h
         here is inferred from prose.
         """
         policy = policy_for(blocker)
-        # An Arc that stopped implemented nothing, so nothing about it was independently
-        # reviewed. Saying that out loud is the whole point of the evidence level.
-        level = evidence_level(
-            providers=providers,
-            tests_passed=False,
-            require_independent_review=(
-                config.provider_policy.require_independent_review_for_verified
-            ),
-            blocked=True,
+        changed_paths: list[str] | None
+        try:
+            changed_paths = sorted(path for path in git_changed_paths(root) if not owned(path))
+        except OSError:
+            changed_paths = None
+        work_performed = bool(changed_paths) if changed_paths is not None else None
+        level = (
+            EvidenceLevel.BLOCKED_WORK_UNKNOWN if work_performed is None
+            else EvidenceLevel.BLOCKED_WITH_CHANGES if work_performed
+            else EvidenceLevel.BLOCKED_NO_IMPLEMENTATION
         )
         _write_summary(
             artifacts_dir,
@@ -315,7 +316,8 @@ def _run_relay(  # noqa: C901 - one relay, one readable sequence; splitting it h
             record(
                 "core",
                 "EVIDENCE_ASSESSED",
-                {"evidence_level": level.value, "providers": providers, "work_performed": False},
+                {"evidence_level": level.value, "providers": providers,
+                 "work_performed": work_performed, "changed_paths": changed_paths},
             )
             if policy.requires_decision:
                 # A human has to decide something here, so it belongs in `maru inbox` rather
@@ -810,7 +812,9 @@ def _run_relay(  # noqa: C901 - one relay, one readable sequence; splitting it h
             },
             review_dir / "full.diff",
         )
-        violations = review_worker_changes(worker_changed | set(relay_changed), plan_text)
+        violations = review_worker_changes(
+            worker_changed | set(relay_changed), plan_text, writable_paths=plan.writable_paths
+        )
         if violations:
             stop(
                 "Worker changed files the approved plan does not cover: " + "; ".join(violations),
@@ -834,6 +838,19 @@ def _run_relay(  # noqa: C901 - one relay, one readable sequence; splitting it h
         test_log = logs_dir / f"tests-{evidence_iteration}.log"
         test_log.write_text(test_output, encoding="utf-8")
         record("core", "TESTS_COMPLETED", {"passed": tests_passed, "attempt": iteration}, test_log)
+
+        try:
+            checked_paths = sorted(path for path in git_changed_paths(root) if not owned(path))
+            checked_tree = _snapshot_tree(root, config, checked_paths)
+        except OSError as error:
+            stop(f"Cannot verify workspace after checks: {error}", BlockerClass.CAPABILITY_MISSING)
+        if tree is None or checked_tree is None:
+            stop("Cannot verify workspace identity after checks", BlockerClass.CAPABILITY_MISSING)
+        if checked_tree != tree:
+            stop(
+                "Deterministic checks modified the workspace; reconcile changes before rerun",
+                BlockerClass.AUTHORITY_CONFUSION,
+            )
 
         advance(ArcState.CODE_REVIEW, "reviewer", "Reviewer compares the plan against the diff")
         use_incremental = (
@@ -1126,6 +1143,10 @@ def _restore_or_create_arc(store: SqliteStore, slug: str, goal: str) -> Arc:
         raise RelayStopped(f"Arc {slug} is {arc.state.value}; start the relay under a new slug")
     if store.list_open_gates(arc.id):
         raise RelayStopped(f"Arc {slug} has an open human gate; approve or reject it first")
+    if arc.state is ArcState.HUMAN_APPROVAL:
+        raise RelayStopped(
+            f"Arc {slug} is HUMAN_APPROVAL without an open gate; reconcile its approval record"
+        )
     if arc.state is not ArcState.PLANNING:
         if arc.state is not ArcState.PAUSED:
             store.transition_arc(arc.id, ArcState.PAUSED, source="core", next_step="Relay restart")
@@ -1298,7 +1319,11 @@ def _write_summary(
             f"(owner: {policy.owner}, "
             f"fixable by plan revision: {policy.fixable_by_revision}, "
             f"retryable: {policy.retryable})\n\n"
-            "No implementation was performed for this Arc.\n"
+            + (
+                "No implementation was performed for this Arc.\n"
+                if evidence is EvidenceLevel.BLOCKED_NO_IMPLEMENTATION
+                else "Completion is blocked; inspect workspace changes before resuming.\n"
+            )
         )
     sections.append(f"## Deterministic Tests\n\n```text\n{tests}\n```\n")
     if packets:

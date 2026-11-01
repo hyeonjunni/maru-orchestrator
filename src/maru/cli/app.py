@@ -144,7 +144,12 @@ def status() -> None:
             f"{blocker.value} raised by {raised.get('role', 'core')} (owner {policy.owner}, "
             f"{'consumes' if policy.fixable_by_revision else 'does not consume'} plan revision)",
         )
-        table.add_row("Work done", "none; no implementation was performed")
+        table.add_row(
+            "Work done",
+            "none; no implementation was performed"
+            if evidence == "BLOCKED_NO_IMPLEMENTATION"
+            else "completion blocked; inspect workspace changes",
+        )
         if policy.requires_decision:
             table.add_row(
                 "Decision", "Governance escalation: a human must approve or reject this Arc"
@@ -282,7 +287,11 @@ def inbox() -> None:
             policy = policy_for(BlockerClass(str(blocker)))
             console.print(f"  Governance decision required - {blocker}")
             console.print(f"  Raised by: {opened.get('role', 'core')} (owner: {policy.owner})")
-            console.print("  No implementation was performed for this Arc.")
+            console.print(
+                "  No implementation was performed for this Arc."
+                if opened.get("evidence_level") == "BLOCKED_NO_IMPLEMENTATION"
+                else "  Completion is blocked; inspect workspace changes before resuming."
+            )
         else:
             level = opened.get("evidence_level", "unknown")
             console.print(f"  Completion approval - evidence {level}")
@@ -303,6 +312,10 @@ def _resolve_gate(gate_id: str, status: GateStatus, decision: str | None) -> Non
         problem = authorize_delegated(config.delegation, decision)
         if problem is not None:
             raise typer.BadParameter(problem)
+        if decision != f"{gate_id}:{status.value}":
+            raise typer.BadParameter(
+                "Delegated decision must match the exact <gate-id>:<APPROVED|REJECTED> outcome"
+            )
         actor = config.delegation.actor
     try:
         gate, arc = store.resolve_gate(gate_id, status, actor=actor)
@@ -323,7 +336,7 @@ def _resolve_gate(gate_id: str, status: GateStatus, decision: str | None) -> Non
         # Approving a blocker grants authority; it does not do the work. Say what is left,
         # so an Arc that is still paused on purpose does not read as a no-op decision.
         console.print(
-            "Authority granted; no implementation was performed. "
+            "Decision recorded; protected actions must be completed by the human. "
             f"Resume with `maru resume {gate.arc_id}` once the blocker is cleared."
         )
 
