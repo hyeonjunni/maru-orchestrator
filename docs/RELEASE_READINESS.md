@@ -64,6 +64,20 @@ report. Review any finding by file and category without publishing secret values
 
 ## Rights and remaining approval
 
+### Executed candidate scans
+
+The exact 89-file allowlist export passed Gitleaks 8.30.1 with **zero findings**
+(602,917 bytes scanned). The new initial commit `66dc41e` was then scanned with
+`gitleaks git . --log-opts=--all --redact=100`: **one commit, zero findings**.
+No submodules, LFS pointers, private directory names or personal machine paths were found in
+the selected files. Subsequent evidence-only commits are scanned before handoff; they do not
+change the tested runtime or demo. Scanner provenance and old private-history evidence were
+reused without rerunning those historical scans.
+
+The local candidate has no remote. Its preparation author is `MARU Release Preparation`
+with a reserved example-domain address, rather than the private repository's personal email.
+This identifies automated preparation, not personal authorship or publication rights.
+
 Authorship metadata and successful scans cannot establish rights to every source, prompt,
 fixture or model output. The owner must confirm that the selected files may be published and
 identify any required third-party notices. MIT is a possible permissive project license,

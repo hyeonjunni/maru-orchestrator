@@ -129,6 +129,9 @@ populate token counts. No performance, monetary saving or live-model quality ben
 ## Security and release gates
 
 Final candidate-file and new-history scan evidence is recorded in the release-readiness report.
+The 89-file export and initial candidate commit `66dc41e` both passed Gitleaks with no findings.
+The import's whitespace check reported inherited Markdown hard-break spaces and extra EOF blank
+lines; these were retained rather than making unrelated source changes. Ruff and Mypy passed.
 Earlier unchanged history/scanner provenance is reused. License selection, ownership confirmation,
 public author identity and explicit publication approval remain owner decisions. No LICENSE was
 invented, no remote was configured and no private hosted asset was migrated.
