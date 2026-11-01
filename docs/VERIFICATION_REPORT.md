@@ -2,7 +2,8 @@
 
 Date: 2026-11-01 (Asia/Seoul). Package: 0.2.0. Decision: **READY_WITH_LIMITATIONS**.
 This is a local curated candidate, not a published release. No remote push, public repository
-creation, visibility change or model request was performed.
+creation or visibility change was performed. A later authorized personal Claude CLI trial is
+recorded below; its evidence supersedes the initial readiness-only status.
 
 ## Candidate boundary and reused evidence
 
@@ -17,7 +18,7 @@ candidate has independently initialized history and no configured remote. See
 [PUBLIC_FILES.txt](../PUBLIC_FILES.txt) for the exact intended release file list and
 [release readiness](RELEASE_READINESS.md) for exclusions and rights gates.
 
-## Fresh execution on this candidate
+## Reused candidate verification before the live trial
 
 Environment: Windows AMD64, CPython 3.12.14, uv 0.12.7, Git 2.55.0.windows.2.
 A new `.venv` was created in this checkout; 27 locked packages installed successfully.
@@ -85,22 +86,22 @@ It retains its generated directory rather than deleting evidence.
 | Deterministic synthetic demo | PASS; fake role artifacts, real core/CLI/Git/SQLite/test gate |
 | Recorded-adapter external-project E2E | PASS in candidate suite |
 | Recorded provider-envelope parsing | PASS in candidate suite; historical fixture data |
-| Installed local provider CLIs | Claude Code 2.1.263; Codex CLI 0.160.0 detected |
+| Installed local provider CLIs | Live trial: Claude Code 2.1.316; earlier Codex readiness check: 0.160.0 |
 | Local authentication-status checks | Both commands exited 0 and reported authenticated; identities/tokens omitted |
-| Current model/network connection | **NOT VERIFIED**; no inference request sent |
-| Real model task completion | **NOT VERIFIED**; requires spending and target approval |
+| Current model/network connection | **PASS for Claude** in the authorized direct smoke; Codex live remains unverified |
+| Real model task completion | **PASS for the bounded Claude calculator task** through HUMAN_APPROVAL; see live evidence below |
 | Cross-platform CI | **CI CONFIGURED**, not REMOTE CI VERIFIED |
 
 Read-only readiness checks used `claude --version`, `claude auth status`, `claude --help`,
 `codex --version`, `codex login status`, and `codex exec --help`. The installed help lists
 Claude's output-format/permission-mode/restricted/json-schema options and Codex's
-json/sandbox/output-schema options used by the adapters. This establishes local command
-availability, not current quota, server reachability, model quality or effective permission isolation.
+json/sandbox/output-schema options used by the adapters. Those earlier checks established local command availability only. The later Claude trial below
+adds bounded server/task evidence, not a guarantee of quota, model quality or permission isolation.
 
 Defaults route Planner/Worker to Claude and Challenger/Reviewer to Codex. Environment overrides
 are executable paths: MARU_CLAUDE_BIN, MARU_CODEX_BIN, MARU_GIT_BIN. MARU does not load `.env`
 automatically. Authentication remains external. The default Worker gets workspace-write;
-other default roles are read-only. Consult [DEMO.md](DEMO.md) for the unexecuted live trial plan.
+other default roles are read-only. Consult [DEMO.md](DEMO.md) for the executed live trial scope and reproduction recipe.
 
 ## README command coverage
 
@@ -110,8 +111,8 @@ wheel; the final default temporary-directory command also passed after Git isola
 CLI init/run/status/inbox/
 resume/approve and expected failure exits ran in the demo. Existing candidate tests exercise
 prompt-file input, trace, cost and rejection. The CLI table describes parameterized forms, not
-literal commands with placeholder IDs. The live recipe is explicitly NOT EXECUTED and excluded
-from offline success claims. Its cost/authentication prerequisite cannot be proved by fake adapters.
+literal commands with placeholder IDs. The live recipe is separately verified below and excluded from offline success claims.
+Its authentication and billing scope must be checked again by each user.
 
 ## CI and limits
 
@@ -124,7 +125,7 @@ Resume replans rather than continuing an exact instruction. Source changes left 
 Worker may need manual reconciliation. SQLite and filesystem writes are not one transaction;
 latest convenience artifacts remain mutable. Worker guards are not full isolation or rollback.
 Use default state paths because some adapters still write under `.maru`. Current adapters do not
-populate token counts. No performance, monetary saving or live-model quality benchmark was run.
+populate token counts. No performance, monetary saving or general model-quality benchmark was run.
 
 ## Security and release gates
 
@@ -135,3 +136,110 @@ lines; these were retained rather than making unrelated source changes. Ruff and
 Earlier unchanged history/scanner provenance is reused. License selection, ownership confirmation,
 public author identity and explicit publication approval remain owner decisions. No LICENSE was
 invented, no remote was configured and no private hosted asset was migrated.
+
+
+## Authorized live Claude trial
+
+Executed 2026-11-01; report updated 2026-11-02 (Asia/Seoul).
+
+This trial used the owner's logged-in personal `claude.ai` subscription through the installed
+Claude Code CLI **2.1.316**. No API key, API-token helper, routing environment override or
+forced API login was found in the inspected process/user settings. Authentication-status output
+was filtered to method/provider/status; account identities and credentials were not saved.
+The process ancestry was PowerShell → Codex → desktop application, not a Claude parent.
+No nested-session marker was present, no nesting block occurred, and no protection was removed.
+`--bare` was not used. Other user sessions were not terminated or modified.
+
+### Direct invocation
+
+```powershell
+claude -p "Reply with exactly MARU_LIVE_READY" --output-format json --max-turns 1 --no-session-persistence
+```
+
+**PASS**: exit 0, valid JSON, `is_error=false`, subtype `success`, exact result
+`MARU_LIVE_READY`, empty stderr, one reported turn, **5.64 seconds**.
+
+### Real MARU coding path
+
+A separate temporary Git repository contained a deliberately incorrect `add(a, b)` returning
+`a - b`, an empty `src/__init__.py`, and one pytest test with two addition assertions.
+Before execution: **1 failed in 0.19 s**, reporting `add(2, 3) == -1` instead of `5`.
+All four roles used the real Claude adapter; fallback, plan revisions and review-fix loops
+were disabled. Per-agent timeout was 180 seconds; test-command timeout was 30 seconds.
+No adapter factory was replaced and no recorded/synthetic response was injected.
+
+The installed MARU `run` command completed in **51.30 seconds**, exit 0, empty stderr.
+The real Worker changed only `src/calculator.py`:
+
+```diff
+-    return a - b
++    return a + b
+```
+
+The core's configured pytest gate passed. A separate post-run pytest invocation also passed:
+**1 passed in 0.03 s**. Git status and diff confirmed no other source/test/config changes.
+SQLite held one Arc, four successful AGENT_COMPLETED events and this transition sequence:
+
+```text
+PLANNING -> PLAN_REVIEW -> IMPLEMENTING -> TESTING -> CODE_REVIEW -> HUMAN_APPROVAL
+```
+
+Raw adapter stdout envelopes, per-stage result files, rendered prompts, numbered artifacts,
+test output and SQLite events were retained only in the private temporary workspace. Each
+stage had a nonempty provider session identifier and exit 0; identifiers and raw logs are not
+published. The inspected model label was `claude-opus-5-5` for all four role envelopes.
+
+| Real CLI stage | Reported turns | Provider-reported duration | Provider-reported USD value |
+|---|---:|---:|---:|
+| Planner | 3 | 13.823 s | 0.339357 |
+| Challenger | 3 | 11.683 s | 0.3309612 |
+| Worker | 4 | 6.114 s | 0.1912088 |
+| Reviewer | 2 | 4.029 s | 0.317344 |
+
+There were **5 Claude process invocations** total: one direct smoke and four MARU stages.
+Envelopes report **13 turns** total; this is not a measured HTTP request count. No retries,
+fallback provider or extra model calls were used. The relay's reported USD total was 1.178871;
+including smoke (0.150412), it was **1.329283**. These CLI accounting fields are not evidence of
+an API invoice or additional subscription charges. Actual billed cost was not verified.
+
+Because every role used Claude, the core correctly recorded **PENDING_INDEPENDENT_AUDIT**,
+not VERIFIED. The human gate remains OPEN intentionally. The relay and code-fix E2E passed;
+human approval, a Git merge, Codex review and cross-provider independence are not claimed.
+
+### Reliability after live execution
+
+Without another model request, the same live project rejected rerun and resume while its gate
+was open, rejected a changed request, and rejected a competing process while its project lock
+was held. Each CLI call exited 2. Hash comparison showed all existing task evidence unchanged;
+the Arc stayed HUMAN_APPROVAL and the successful stage count stayed four.
+
+Offline failure/safety tests were freshly executed with:
+
+```text
+uv run pytest -q tests/unit/test_adapter_process.py tests/unit/test_adapter_parsing.py tests/unit/test_gate_lifecycle.py tests/integration/test_relay_restarts.py tests/integration/test_harness.py::test_relay_turns_adapter_launch_failure_into_human_stop tests/integration/test_harness.py::test_relay_rejects_contradictory_passing_review tests/integration/test_harness.py::test_failed_test_gate_loops_back_through_implementing
+```
+
+**21 passed in 19.18 seconds.** This covers timeout, malformed output, adapter launch failure,
+failed gates, approval boundaries, repeated evidence and concurrency without provider usage.
+No MARU integration defect required a code fix. A one-off inspection helper initially decoded
+CLI help as CP949; that was not MARU's UTF-8 adapter path and did not affect live execution.
+No new runtime regression test was necessary. The unchanged full suite, Ruff, Mypy and installed
+package evidence above are reused; no redundant full-suite run was made for documentation edits.
+The seven changed Markdown files passed local-link, private-path/session-ID and Gitleaks checks.
+Wheel and sdist were rebuilt successfully after the documentation update. No raw run logs or
+credentials entered the public candidate; the file manifest is unchanged.
+
+| Verification target | Final status |
+|---|---|
+| Unit tests | PASS, prior complete suite reused; relevant failure tests freshly rerun |
+| Recorded Adapter E2E | PASS, unchanged candidate evidence reused |
+| Claude CLI direct invocation | PASS, live |
+| MARU → Claude live integration | PASS, four real subprocess stages |
+| Real code modification E2E | PASS through HUMAN_APPROVAL; only authorized source line changed |
+| Local package installation | PASS, unchanged runtime evidence reused |
+| GitHub remote CI | NOT_VERIFIED |
+
+This is one small Windows task on one installed CLI version. It does not establish general
+model reliability, other operating systems or third-party subscription terms. MARU launches a
+user's own official CLI; it does not collect, copy or relay subscription credentials. Any hosted
+or third-party authentication design requires a separate review of applicable official terms.

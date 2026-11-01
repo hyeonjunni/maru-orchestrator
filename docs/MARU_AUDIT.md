@@ -61,7 +61,7 @@ commands, counts, skips and environment limitations.
 | Test/agent failure handling | Harness, test-gate and typed-blocker regression suites |
 | SQLite state and gates | Storage and gate-lifecycle regression suites |
 | Recovery | PARTIAL: state restoration and safe restart, not exact checkpoint replay |
-| Claude/Codex integration | Adapter contracts and recorded fixtures; current live calls are not verified |
+| Claude/Codex integration | Claude direct smoke and bounded coding relay verified live on Windows; Codex live remains unverified. See verification report. |
 | Context projection | Projection and incremental-review tests; no claimed real-model savings |
 | Cross-platform behavior | Windows evidence plus configured Linux/macOS/Windows workflow; remote results unverified |
 | Discovery, Bridge, memory, GUI | NOT_IMPLEMENTED and outside this stabilization scope |

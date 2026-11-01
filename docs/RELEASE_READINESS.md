@@ -1,6 +1,6 @@
 # MARU release readiness
 
-Review date: 2026-11-01 (Asia/Seoul).
+Review date: 2026-11-01; live follow-up documented 2026-11-02 (Asia/Seoul).
 
 **READY_WITH_LIMITATIONS** is the recommendation for this curated release candidate,
 conditional on the final candidate checks recorded in [VERIFICATION_REPORT.md](VERIFICATION_REPORT.md).
@@ -39,7 +39,7 @@ Git directory or mirror all refs into the public repository.
 | Hosted CI | Not verified. The cross-platform workflow is included; remote execution and macOS/Linux results are not inferred from local tests. |
 | Hosted assets | Not migrated or relied on as release evidence. Earlier hosted logs/artifacts/releases were unavailable for review. |
 | Ownership and project license | Pending owner confirmation. No project license has been selected or applied. |
-| Live provider validation | No new paid model call is part of this preparation. Recorded fixtures and offline tests do not prove current provider authentication or availability. |
+| Live provider validation | Authorized personal Claude CLI trial passed: direct smoke and real four-role calculator fix. Same-provider evidence remains PENDING_INDEPENDENT_AUDIT; human approval and Codex live execution are not claimed. See the verification report. |
 
 The scanner came from the [official Gitleaks v8.30.1 release](https://github.com/gitleaks/gitleaks/releases/tag/v8.30.1),
 and its Windows x64 archive matched the published SHA256:

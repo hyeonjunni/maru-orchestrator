@@ -104,7 +104,10 @@ In the source checkout, prefix them with `uv run`.
 | `maru approve <gate-id>` / `maru reject <gate-id>` | Resolve a human gate |
 | `maru resume example` | Restore a paused Arc's prior state |
 
-**Live recipe — NOT EXECUTED for this candidate; credentials and cost approval required.**
+**Live Claude trial verified on Windows; each new run still requires your credentials and usage approval.**
+One calculator bug was fixed through the real four-role Claude relay and pytest gate; the
+result remains at human approval with PENDING_INDEPENDENT_AUDIT because all roles used Claude.
+See the [live evidence and reproduction](docs/DEMO.md#live-claude-calculator-trial).
 Install MARU into the environment that exposes its CLI, authenticate the selected
 provider CLIs, and review their permissions and costs. Work in a trusted target repository with
 a committed baseline and meaningful project checks. Keep the request outside the target tree

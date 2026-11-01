@@ -14,7 +14,9 @@ The stabilization baseline recorded **283 passed, 1 skipped on Windows**. This i
 evidence, not a new result for the public release candidate. Use
 [VERIFICATION_REPORT.md](VERIFICATION_REPORT.md) for the current candidate's commands, counts,
 installation checks and platform gaps. Tests use temporary repositories and recorded or fake
-adapters. No current live-provider success, productivity gain or monetary saving is claimed.
+adapters. A subsequent authorized Claude CLI trial fixed a calculator bug through the real relay,
+changed pytest from failure to pass, and reached HUMAN_APPROVAL in 51.30 seconds. All four roles
+used Claude, so independent review remains pending. No productivity gain or monetary saving is claimed.
 
 The implementation already includes 0.2.0 context and governance features. Stabilization preserves
 them while keeping new work within the core CLI/relay scope. Learning agents, a task scheduler,
@@ -226,10 +228,11 @@ Current candidate installation evidence belongs in [VERIFICATION_REPORT.md](VERI
 > Built MARU, an AI-assisted local development CLI with structured agent handoffs, a deterministic
 > state machine, SQLite history and executable quality gates. Reproduced and corrected approval
 > bypasses, concurrent execution risks and restart evidence overwrites. Added focused regression
-> coverage and verified installed-package usage, while documenting the limits of recovery and
-> live-provider validation.
+> coverage and verified installed-package usage. A live four-role Claude relay corrected a
+> calculator bug, passed the existing test and reached human approval; independent review and
+> exact checkpoint recovery remain explicit limits.
 
 For an interview demonstration, run the offline external-project relay test from the verification
 report, then show a pending gate refusal and the retained numbered evidence. No before/after cost,
 latency or productivity benchmark has been completed. Future work should prioritize checkpoint
-recovery, stronger execution isolation and approved live-provider validation over additional agents.
+recovery, stronger execution isolation and cross-provider/platform validation over additional agents.

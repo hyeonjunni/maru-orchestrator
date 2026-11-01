@@ -69,17 +69,121 @@ With MARU installed and its CLI on PATH, `maru trace greeting` and `maru cost gr
 that directory display the corresponding events and telemetry. `MERGED` is a MARU state;
 neither the demo approval nor MARU merges source changes into a Git branch.
 
-## Live trial plan — not executed
+## Live Claude calculator trial
 
-The smallest useful trial is the same greeting helper in a fresh disposable repository with
-`check.py` asserting its return value. Initialize MARU, configure the real check, commit the
-baseline and submit the goal through `maru run`. Do not inject `SyntheticAdapter` for this trial.
+Executed on 2026-11-01 (Asia/Seoul), documented on 2026-11-02. This is real model execution,
+separate from the synthetic walkthrough above. Claude Code 2.1.316 used an existing personal
+`claude.ai` subscription. No credentials were copied or relayed, and no `--bare` or nesting
+workaround was used.
 
-Before running it, obtain permission for provider charges and the exact disposable target.
-Use a bounded plan/review loop, disable provider fallback if spending must remain with one
-account, and review the provider's CLI permissions. Defaults use Claude Planner/Worker and
-Codex Challenger/Reviewer. Authentication belongs to those CLIs, not to MARU.
+A deliberately incorrect calculator started with one failing pytest test. MARU called the
+real Claude adapter for all four roles. The Worker changed only `return a - b` to `return a + b`.
+The core test gate and a post-run test passed. The relay exited 0 in 51.30 seconds and stopped
+at HUMAN_APPROVAL, leaving its gate open. Same-provider evidence is PENDING_INDEPENDENT_AUDIT,
+not VERIFIED. Codex live execution and user approval are not claimed.
 
-Local version/help and authentication-status commands were checked without a model request;
-see [verification](VERIFICATION_REPORT.md). Network/model connectivity and live task success
-remain unverified. A local logged-in status does not prove quota, billing scope or server access.
+See [verification](VERIFICATION_REPORT.md#authorized-live-claude-trial) for timings, usage and
+evidence checks. Raw sessions and logs remain private.
+
+### Reproduce with approved personal usage
+
+This consumes your account's allowance. Obtain permission for that use and the disposable
+target first. Use a normal PowerShell terminal, not a nested Claude session. Check
+`claude --version` and `claude auth status` locally; do not share raw account output.
+Inspect API-key/auth-token/provider-routing variables and applicable Claude settings. Stop if
+they would change the intended login or billing method. Never clear a nesting marker to bypass
+the CLI's protection. This recipe is not a credential integration for a hosted product.
+
+From the MARU checkout, using PowerShell 7 (UTF-8 without BOM):
+
+```powershell
+uv sync --locked
+$Python = (Resolve-Path .venv/Scripts/python.exe).Path
+$Maru = (Resolve-Path .venv/Scripts/maru.exe).Path
+if (Test-Path Env:CLAUDECODE) { throw "Use an independent normal terminal" }
+if (Get-ChildItem Env:GIT_* -ErrorAction SilentlyContinue) { throw "Use a terminal without Git redirection variables" }
+$Trial = Join-Path $env:TEMP ("maru-live-e2e-" + [guid]::NewGuid())
+New-Item -ItemType Directory -Path $Trial | Out-Null
+Set-Location $Trial
+New-Item -ItemType Directory -Path src, tests, empty-hooks | Out-Null
+Set-Content src/__init__.py -Value '' -Encoding utf8
+@'
+def add(a: int, b: int) -> int:
+    return a - b
+'@ | Set-Content src/calculator.py -Encoding utf8
+@'
+from src.calculator import add
+
+def test_add():
+    assert add(2, 3) == 5
+    assert add(-2, 3) == 1
+'@ | Set-Content tests/test_calculator.py -Encoding utf8
+@'
+.maru/
+tasks/
+__pycache__/
+.pytest_cache/
+empty-hooks/
+'@ | Set-Content .gitignore -Encoding utf8
+```
+
+Create a configuration using the prepared environment's Python and zero retry loops:
+
+```powershell
+$GatePython = $Python.Replace('\', '/')
+@"
+[agents.planner]
+backend = "claude"
+permission = "read-only"
+[agents.challenger]
+backend = "claude"
+permission = "read-only"
+[agents.worker]
+backend = "claude"
+permission = "workspace-write"
+[agents.reviewer]
+backend = "claude"
+permission = "read-only"
+[provider_policy]
+allow_fallback = false
+require_independent_review_for_verified = true
+[limits]
+plan_revisions = 0
+review_fix_loops = 0
+[test_gate]
+commands = [["$GatePython", "-m", "pytest", "-q"]]
+"@ | Set-Content maru.toml -Encoding utf8
+$EmptyHooks = (Resolve-Path empty-hooks).Path
+git init -q --template=$EmptyHooks
+git config --local core.hooksPath "$EmptyHooks"
+git add -- .gitignore maru.toml src tests
+git -c core.hooksPath="$EmptyHooks" -c user.name="MARU live test" -c user.email="live-test@example.invalid" -c commit.gpgsign=false commit -qm "Failing calculator baseline"
+& $Python -m pytest -q
+if ($LASTEXITCODE -ne 1) { throw "Expected the deliberately failing baseline" }
+& $Maru init
+& $Maru run "Fix the add function bug so existing pytest tests pass. Modify only src/calculator.py; no test changes, new dependencies, commit, merge or push. MARU Core runs the tests." --slug calculator-fix --timeout 180 --test-timeout 30
+if ($LASTEXITCODE -ne 0) { throw "Relay stopped; inspect evidence before another call" }
+& $Python -m pytest -q
+git diff -- src/calculator.py
+git status --short
+& $Maru status
+& $Maru inbox
+```
+
+This recipe follows the executed fixture and CLI flow; the literal documentation block was
+not run as a second paid trial. Only `src/calculator.py` should change. Inspect the summary
+and event trace, and leave the gate open until you have reviewed the work. This recipe does
+not auto-approve, merge or push. Do not retry failed or timed-out attempts indefinitely.
+
+```text
+Before: 1 failed
+After: 1 passed
+State: HUMAN_APPROVAL
+Evidence: PENDING_INDEPENDENT_AUDIT
+Changed file: src/calculator.py
+```
+
+The trial used five Claude process invocations including the one-turn direct smoke, without
+fallback or retry. Reported dollar fields are accounting estimates, not proof of additional
+charges. Each user must check their own CLI version, authentication, allowance and applicable
+terms; one successful task does not guarantee results in another environment.
