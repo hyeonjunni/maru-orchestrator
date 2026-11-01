@@ -1,5 +1,199 @@
 # Public release candidate verification
 
+## Korean README and publication preparation — 2026-11-02
+
+**READY_FOR_PUBLICATION_APPROVAL.** This checkpoint supersedes the prior approval-pending,
+license-pending, uncommitted-patch and partially green test statements retained below.
+No push, force push, visibility change or GitHub Release publication was performed.
+
+### Editorial result
+
+README.md is now Korean-first, with a short introduction, one Mermaid flow, offline start,
+project setup, actual Claude execution example, design decisions and a compact scope section.
+`humanizer-ko` was used for a draft/edit/fact-preservation pass. Repeated negative contrasts,
+promotional adjectives, redundant headings and excessive emphasis were removed. The terminal
+summary is explicitly reconstructed from recorded evidence. Local links and code fences were
+checked; no badge claims remote CI success. A second English README was unnecessary, avoiding
+an additional document that would need synchronized updates.
+
+### Final fresh checks
+
+| Check | Result |
+|---|---|
+| First requested full rerun after the prior audit | 293 passed, 0 failed, 1 skipped; 122.80 s |
+| Independent patch review | 19 files reviewed; one medium Windows filename-alias issue found |
+| Alias regression before/after correction | Four cases failed before the fix; all 28 input tests passed afterward |
+| Narrow independent follow-up | Two files reviewed; issue addressed, no further findings |
+| Final `uv run pytest -q -ra` after that correction | **297 passed, 0 failed, 1 skipped; 123.68 s** |
+| `uv run ruff check .` | PASS |
+| `uv run mypy src scripts` | PASS; 26 source files |
+| `uv build` | PASS; wheel and sdist |
+| Fresh Python 3.12 venv + wheel install | PASS; 14 runtime dependencies plus MARU |
+| Installed CLI outside the source import path | `--help`, `init`, `status`, `doctor`: exit 0 |
+| Installed synthetic demo | PASS through approval and MERGED; no provider model request |
+| Recorded Adapter / external-project E2E | PASS in final full suite |
+| Package membership and licensing | Wheel: 36 entries, MIT metadata and license text; sdist: 91 entries, exactly 90 public files plus PKG-INFO |
+| Public file Gitleaks scan | 90 files, 651,881 bytes at scan, zero findings; subsequent report-only changes scanned separately |
+| Markdown links / fences / whitespace | PASS |
+
+The skip is `test_config_rejects_symlink_escape`: this Windows host cannot create the required
+symlink. macOS/Linux and hosted GitHub Actions remain unverified. The second whole-suite run
+was necessary because independent review found a new input-boundary defect after the first
+whole-suite run had passed. Counts overlap and must not be added.
+
+The Windows alias fix rejects computed snapshot names ending in spaces or dots before any
+copy. Cases include `manifest.json `, `manifest.json.`, `spec ` and `spec.` with extensionless
+input files. This closes the reviewed A6 edge case without broadening the feature set.
+
+Reused evidence: the authorized Claude direct smoke and four-role calculator run, explicit
+human approval to MERGED, 53 preserved files and 19 preserved events; dependency-license
+inventory and scanner provenance. These were not rerun as paid model trials. No new external
+provider CLI audit or live relay was needed; the independent patch review used a native reviewer.
+
+### License, rights and Git preparation
+
+The owner confirmed publication rights, selected MIT, and explicitly approved
+`Copyright (c) 2026 hyeonjunni`. LICENSE and package metadata now reflect that decision.
+The dependency licenses listed in RELEASE_READINESS.md remain separate upstream obligations.
+The new Git author is the owner-confirmed `hyeonjunni <bobo050716@gmail.com>`.
+
+The supplied remote is [hyeonjunni/maru-orchestrator](https://github.com/hyeonjunni/maru-orchestrator).
+GitHub metadata reported an empty public repository with default branch `main`; `git ls-remote`
+returned no refs. Only MARU-PUBLIC was connected as `origin`. Its curated root is `66dc41e`;
+no private-repository Git history was copied. The prior three preparation commits retain their
+original synthetic identity. Local publication branch: `main`.
+
+Runtime/test corrections are committed as `5d31edd` (`fix: harden approval and execution
+evidence boundaries`). The following publication-preparation commit contains the Korean README,
+MIT license, build exclusion, allowlist and updated reports. Final commit IDs and the all-ref
+Gitleaks history scan are reported in the handoff after that commit is created.
+
+Remaining approval: explicit permission to push local `main` to the supplied repository.
+The GitHub connector reports read-only permission; Git CLI push authentication has not been
+tested. Resolve authentication if required after publication is authorized. Hosted CI results
+will be available only after an authorized push. Release tagging/publication remains separate.
+
+The rest of this document is retained historical evidence, not the current release gate.
+
+## Final publication gate — 2026-11-02 (Asia/Seoul)
+
+Decision: **READY_WITH_LIMITATIONS**, not permission to publish. Scope is the public
+candidate at base commit `6a1eb4c` plus the current audit patch. Changes are not committed;
+that base hash alone does not identify the corrected candidate. The original private
+repository was not modified. No GitHub repository creation, push, visibility change, release
+publication or project-license selection was performed.
+
+### 1. Independent audit
+
+A separate, explicitly authorized Codex CLI source-bundle review completed. The first
+attempt was policy-blocked and did not review source. The successful review was static,
+without tools/tests, and found nine issues. The current session reproduced and addressed
+them and found an additional crash-window approval issue and a packaging-boundary issue. See [MARU_AUDIT.md](MARU_AUDIT.md)
+for severity, source locations, reproductions, impact, resolutions and exact coverage.
+The independent review covers the baseline; the resulting patch has local regression
+validation, not another independent model review. No claim of an independent live calculator
+task review or live MARU-to-Codex adapter E2E is made.
+
+### 2. Defects and corrections
+
+Changes are confined to existing relay/process/input/gate/validation/guard code, the planner
+contract, related tests and existing documentation. Checks now fail closed on Git-visible
+tree mutation; delegated decisions bind to one gate/outcome; grading edits require explicit
+file lists; input evidence is reused without overwriting; input filename collisions and
+contradictory review classifications are rejected; local task files are explicitly excluded from sdist; exceptional process exits reap children;
+blocked-work reporting reflects retained changes; missing gate records cannot restart an
+HUMAN_APPROVAL Arc. Governance approval wording now describes the existing manual-action
+boundary. No dependency or unrelated refactor was added.
+
+### 3. Human Approval
+
+Before action, retained before/after pytest logs, actual calculator diff, four provider
+envelopes, SQLite transitions, evidence level and OPEN gate were inspected. Only
+`src/calculator.py` changed (`a - b` to `a + b`); the old test failed once and the corrected
+test passed. Four role envelopes had exit 0, success subtype and nonempty session identifiers.
+The original state sequence reached HUMAN_APPROVAL with PENDING_INDEPENDENT_AUDIT.
+
+The owner explicitly approved the exact live gate in this chat. The actual installed CLI
+command was `maru approve <live-gate-id>` from the retained trial project. It exited 0:
+**gate APPROVED, Arc MERGED, zero open gates**. Hash comparison preserved all 53 retained
+evidence/source files. All 19 prior events were identical; exactly two events were appended
+(gate decision and state transition). No model call, source modification or Git merge/push
+occurred. The original PENDING_INDEPENDENT_AUDIT event was preserved, not rewritten.
+
+The reject path was exercised through the existing synthetic/recorded relay fixture and real
+CLI: REJECTED is terminal, open gates disappear and active status becomes empty. Approval
+and rejection fixtures are part of `test_a_resolved_gate_moves_the_arc_to_a_terminal_state`
+in the full-suite run. This is separate from the owner's real approval.
+
+### 4. Fresh verification and reused evidence
+
+| Executed in this audit | Result |
+|---|---|
+| Targeted regressions before fixes | Observed failures for live child after interrupt, post-check mutation, overwritten input, manifest collision, unbound delegated approval, prose-derived grading permission, contradictory review class, false no-work evidence and missing-gate restart |
+| Final-candidate full `uv run pytest -q -ra` — exactly one full run | **289 passed, 3 failed, 1 skipped**, 112.93 s |
+| Follow-up `uv run pytest tests/integration/test_relay_restarts.py tests/integration/test_harness.py::test_changes_diff_shows_tracked_edits_and_new_file_contents tests/unit/test_planning_policy.py -q` | **25 passed**, 12.94 s; fixes all three full-run failures and includes the added missing-gate regression |
+| Other changed-scope runs | Process 2 passed; input/check boundary 25 passed; delegated CLI 1 passed; guard/allowed grading integration 11 passed; models 6 passed; blocked-work/check integration 14 passed |
+| `uv run ruff check .` | PASS |
+| `uv run mypy src scripts` | PASS, 26 source files |
+| `uv build` | PASS, wheel and sdist; rebuilt after the final runtime change |
+| Clean venv + wheel install, outside source import path | PASS; installed help/init/status and synthetic demo completed |
+| Recorded-adapter and external-project E2E | PASS in the full run, apart from the explicitly identified fixture expectations below |
+| Actual Live E2E approval | PASS after explicit user decision; evidence preserved |
+
+Do not describe the full run as an all-green run. Two failures needed fixture migration to
+the new explicit-path/schema contract; one expected the old later guard error but now stops
+earlier when a check mutates files. The follow-up updated those expectations and verified
+them, plus the approval crash-window fix. Counts overlap and must not be summed. No second
+full suite was run, following minimum-sufficient-verification instructions. There are no
+unresolved failures in the executed follow-up scope. The unchanged skipped symlink test
+requires Windows symlink privileges or another host; it is not a PASS.
+
+The fresh wheel environment resolved 14 runtime dependencies rather than the locked dev
+environment's 26 third-party packages. Newer resolved platformdirs/pydantic/pydantic-core/typer
+versions were observed; installed smoke passed. The lockfile and dependency declarations did
+not change. README CLI/installation commands were checked against current entry points;
+the fresh installed demo exercised the quick-start flow. Earlier exact `uv sync --locked`
+and default `uv run python scripts/demo.py` execution evidence is reused. No new paid live
+relay was run after the planner-schema changes; provider compatibility of that changed
+contract has static/schema/fixture evidence only.
+
+Reused evidence: original 285-pass/1-skip candidate report; authorized Claude direct smoke and
+four-role task; pre/post calculator pytest logs; scanner version/provenance and SHA-pinned CI
+reference review. These are not represented as newly executed tests or a new model benchmark.
+
+### 5. Secrets and public security
+
+Gitleaks 8.30.1 with default rules and full redaction scanned the 89-file manifest export:
+**zero findings** (637,783 bytes at that scan). All three reachable candidate commits through
+`6a1eb4c` also produced **zero findings** (615,178 bytes). Final documentation/whitespace changes were
+scanned separately. No rule suppression was added. Build inspection found 35 wheel entries
+and 90 sdist entries, with no private audit transcripts, environments, runtime logs or Git
+directory. Runtime evidence and reviewer transcripts remain ignored local material.
+This is pattern detection and a reviewed file boundary, not proof that every possible secret
+or business-sensitive fact is absent. No remote is configured.
+
+### 6–9. License, publication blockers, portfolio and approvals
+
+MIT is recommended; Apache-2.0's explicit patent/notice terms are compared in
+[RELEASE_READINESS.md](RELEASE_READINESS.md). All installed dependency metadata was inventoried;
+no dependency code is vendored. Project ownership and rights to every source/prompt/fixture
+cannot be established from this repository. The owner must confirm them and select a license
+and copyright holder before a LICENSE can be finalized.
+
+GitHub publication remains blocked on those rights/license decisions and explicit permission
+to create/push/publish. Hosted Windows/macOS/Linux CI is unverified; local verification is
+Windows-only. Public author identity also remains an owner decision. The live Human Approval
+decision is complete and is not among remaining approvals.
+
+Both portfolio summaries now distinguish real process control, role handoffs, deterministic
+states, test/Human Approval gates, retained evidence, external-project bug fixing and failure
+boundaries. The one task plus direct smoke used five Claude processes, 13 reported turns and
+USD 1.329283 in CLI accounting fields. These are not additional charges or a general average.
+Small-task orchestration overhead and unmeasured optimization opportunities are disclosed.
+
+The retained historical sections below describe earlier checkpoints. The final section above
+supersedes their approval-pending and pre-audit status statements.
+
 Date: 2026-11-01 (Asia/Seoul). Package: 0.2.0. Decision: **READY_WITH_LIMITATIONS**.
 This is a local curated candidate, not a published release. No remote push, public repository
 creation or visibility change was performed. A later authorized personal Claude CLI trial is

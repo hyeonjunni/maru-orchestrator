@@ -225,6 +225,23 @@ Current candidate installation evidence belongs in [VERIFICATION_REPORT.md](VERI
 
 ## Application-ready summary
 
+### Live execution evidence and cost boundary
+
+One bounded external Python project trial invoked real Claude processes through MARU's Planner,
+Challenger, Worker and Reviewer. The Worker changed only `src/calculator.py` from subtraction to
+addition. Existing pytest changed from one failure to one pass; SQLite recorded the deterministic
+sequence through HUMAN_APPROVAL and retained prompts, results, test logs and numbered evidence.
+The owner explicitly approved the live gate on 2026-11-02; its Arc reached MERGED with 53
+evidence/source files and the original 19 events preserved. No Git merge or model call occurred. Same-provider task evidence is still
+PENDING_INDEPENDENT_AUDIT; a repository code audit does not retroactively change that task record.
+
+Including the direct smoke, this trial used **five Claude processes, 13 reported turns and
+USD 1.329283 (approximately USD 1.3293) in CLI accounting fields**. These are not measured HTTP
+requests, verified extra charges or an average across tasks. For a one-line bug, orchestration
+overhead can outweigh the work itself. Context/call reduction remains future optimization,
+with no measured saving claimed. Failure classification, refusal paths and post-execution guards
+are testable boundaries, not proof of an OS sandbox.
+
 > Built MARU, an AI-assisted local development CLI with structured agent handoffs, a deterministic
 > state machine, SQLite history and executable quality gates. Reproduced and corrected approval
 > bypasses, concurrent execution risks and restart evidence overwrites. Added focused regression

@@ -3,6 +3,7 @@
 .gitignore
 AGENTS.md
 CLAUDE.md
+LICENSE
 MARU_MASTER_SPEC.md
 PUBLIC_FILES.txt
 README.md
