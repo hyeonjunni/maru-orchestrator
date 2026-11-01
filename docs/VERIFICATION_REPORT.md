@@ -1,5 +1,30 @@
 # Public release candidate verification
 
+## Initial GitHub publication — 2026-11-02
+
+The owner authorized the initial push and necessary CI corrections to
+[hyeonjunni/maru-orchestrator](https://github.com/hyeonjunni/maru-orchestrator).
+`main` at `80b6256` was pushed after confirming a clean tree, the exact origin, an empty
+remote, the curated root `66dc41e`, LICENSE/README inclusion and the existing zero-finding scans.
+The repository is publicly readable without login. Description and six implementation-aligned
+topics were applied. Korean Markdown, tables, code blocks, MIT identification and the Mermaid
+flow were inspected on GitHub. No tag, GitHub Release or visibility change was performed.
+
+[Initial hosted run](https://github.com/hyeonjunni/maru-orchestrator/actions/runs/41323201458):
+Ubuntu and macOS each passed all 298 tests, Ruff, Mypy, build and CLI smoke checks.
+Windows passed 297 tests but failed the recorded Codex-output replay: its Python helper
+encoded Korean fixture text using the host output encoding. Local reproduction with
+`PYTHONIOENCODING=cp1252` failed before correction. The helper now writes the fixture bytes
+directly; existing assertions remain, with exact stdout and empty stderr checks added.
+The focused test then passed under cp1252, and Ruff passed. Production code is unchanged.
+[Subsequent commit runs](https://github.com/hyeonjunni/maru-orchestrator/actions/workflows/ci.yml)
+are the authoritative hosted result for the correction and these documentation changes.
+
+Prior clean-install, offline demo, package membership, licensing and secret-scan evidence below
+is reused; no paid model trial or redundant local whole-suite run was added. The final hosted
+matrix validates the complete suite. Historical preparation checkpoints below describe the
+state before publication and do not supersede this section.
+
 ## Korean README and publication preparation — 2026-11-02
 
 **READY_FOR_PUBLICATION_APPROVAL.** This checkpoint supersedes the prior approval-pending,

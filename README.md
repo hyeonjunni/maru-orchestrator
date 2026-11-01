@@ -162,11 +162,11 @@ uv build
 
 2026-11-02 Windows 전체 테스트 결과는 **297 통과, 0 실패, 1 건너뜀**이다. 건너뛴 항목은 심볼릭 링크 생성 권한이 필요한 경로 검사다. Ruff·Mypy 검사도 통과했다. 테스트에는 Recorded Adapter, 임시 외부 프로젝트, 승인·거절, 실패·재시작 경로가 포함된다. 패키지 빌드·깨끗한 환경 설치와 실제 Claude 실행 결과는 [검증 보고서](docs/VERIFICATION_REPORT.md)에 기록한다.
 
-[GitHub Actions](.github/workflows/ci.yml)는 Ubuntu·macOS·Windows 검증으로 구성돼 있다. 원격 CI 실행 결과는 아직 확인 전이다.
+[GitHub Actions](https://github.com/hyeonjunni/maru-orchestrator/actions/workflows/ci.yml)에서 Ubuntu·macOS·Windows의 pytest, Ruff, Mypy, 패키지 빌드와 CLI 기본 명령을 검사한다. 커밋별 실행 결과는 링크에서 확인할 수 있다.
 
 ## 현재 지원 범위와 알려진 제약
 
-- 실제 실행을 확인한 환경은 Windows다. macOS·Linux는 원격 CI 확인이 남아 있다.
+- 실제 Claude 연동은 Windows에서 확인했다. 운영체제별 CI는 외부 모델 호출 없이 테스트와 CLI 기본 동작을 검사한다.
 - 중단된 작업은 기록을 바탕으로 재계획한다. 정확한 체크포인트 재개와 한 번만 실행되는 동작의 보장은 후속 과제다.
 - Worker 파일 검사는 실행 후에 이뤄진다. 신뢰할 수 있는 프로젝트에서 사용하며, OS 샌드박스와 자동 롤백이 필요한 작업에는 별도 격리가 필요하다.
 - 사용자 승인은 로컬 CLI의 결정이다. 같은 OS 계정의 프로세스는 CLI와 저장 파일에 접근할 수 있다. 번호별 기록과 SQLite의 추가 전용 이벤트도 이 신뢰 범위 안에서 보존된다.

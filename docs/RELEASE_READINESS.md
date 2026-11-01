@@ -9,10 +9,10 @@ The original task's PENDING_INDEPENDENT_AUDIT event remains historical evidence;
 rewritten as a cross-provider task review. Final test/follow-up counts and remaining limits
 are recorded at the top of [VERIFICATION_REPORT.md](VERIFICATION_REPORT.md).
 
-**READY_FOR_PUBLICATION_APPROVAL** follows the final checks recorded in
+**Published to the owner-approved public repository.** Preparation checks are recorded in
 [VERIFICATION_REPORT.md](VERIFICATION_REPORT.md). The owner confirmed publication rights,
-selected MIT, and approved `Copyright (c) 2026 hyeonjunni`. The remaining action is explicit
-permission to push the reviewed candidate; hosted CI will run after publication.
+selected MIT, and approved `Copyright (c) 2026 hyeonjunni`. Initial push of `main` at `80b6256` completed on 2026-11-02. Hosted results and the Windows
+fixture correction are recorded in the latest verification-report section.
 
 ## Release boundary
 
@@ -44,7 +44,7 @@ Git directory or mirror all refs into the public repository.
 | Candidate privacy review | Paths, account identifiers, email addresses, internal URLs and runtime material were reviewed. Test email addresses and retained session IDs are synthetic fixtures. No private machine path or account identifier was found in the reviewed public files. |
 | Final candidate and new history scan | Final execution and results belong in the verification report. This review does not claim a scan that has not run. |
 | Submodules / LFS | No submodule configuration, gitlinks or LFS pointers were found in the inspected candidate. |
-| Hosted CI | Not verified. The cross-platform workflow is included; remote execution and macOS/Linux results are not inferred from local tests. |
+| Hosted CI | Initial Ubuntu/macOS jobs passed all 298 tests. A Windows fixture-encoding failure was reproduced and corrected; see the latest verification section and linked commit runs. |
 | Hosted assets | Not migrated or relied on as release evidence. Earlier hosted logs/artifacts/releases were unavailable for review. |
 | Ownership and project license | Owner confirmed publication rights on 2026-11-02; MIT and Copyright (c) 2026 hyeonjunni are applied in LICENSE and package metadata. |
 | Live provider validation | Claude direct smoke and four-role calculator fix passed; the owner later approved the real gate and it reached MERGED. Same-provider task evidence remains PENDING_INDEPENDENT_AUDIT. Separate Codex static code review is complete; MARU-to-Codex live adapter execution is not claimed. |
@@ -132,7 +132,7 @@ pydantic, rich and typer. Development/transitive dependencies include other lice
 metadata observations are not a complete compatibility review. Preserve upstream notices
 where distribution requires them. No dependency source is vendored by this candidate.
 
-Before publication:
+Historical pre-publication checklist (completed or superseded by the publication record):
 
 1. Complete and record exact-candidate tests, package smoke and secret scans; retain any skips
    and platform limitations in the verification report.
